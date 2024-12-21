@@ -1,0 +1,438 @@
+<html><head><base href="." target="_blank">
+<meta charset="UTF-8">
+<title>Calculadora de Presi&#xf3;n Lateral de los Encofrados</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    :root {
+        --background-color: #f5f7fa;
+        --container-bg: white;
+        --text-color: #2c3e50;
+        --input-bg: #f8f9fa;
+        --border-color: #dce4ec;
+        --shadow-color: rgba(0,0,0,0.1);
+        --subtitle-color: #7f8c8d;
+        --table-header: #34495e;
+        --table-stripe: #f8f9fa;
+        --button-bg: #2c3e50;
+        --button-hover: #34495e;
+    }
+
+    [data-theme="dark"] {
+        --background-color: #1a1a1a;
+        --container-bg: #2c2c2c;
+        --text-color: #ecf0f1;
+        --input-bg: #3d3d3d;
+        --border-color: #4a4a4a;
+        --shadow-color: rgba(0,0,0,0.3);
+        --subtitle-color: #bdc3c7;
+        --table-header: #2c3e50;
+        --table-stripe: #333333;
+        --button-bg: #1a1a1a;
+        --button-hover: #2c2c2c;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+    }
+    .container {
+        background-color: var(--container-bg);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px var(--shadow-color);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden; 
+    }
+    .theme-switch {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    .theme-btn {
+        padding: 10px 20px;
+        border-radius: 20px;
+        border: 2px solid var(--button-bg);
+        background-color: var(--button-bg);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .theme-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px var(--shadow-color);
+    }
+    h1 {
+        color: var(--text-color);
+        font-size: 2.2em;
+        margin-bottom: 10px;
+    }
+    .subtitle {
+        color: var(--subtitle-color);
+        font-size: 1em;
+        margin-top: -5px;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .input-group {
+        margin: 15px 0;
+        padding: 15px;
+        background-color: var(--input-bg);
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+    .input-group:hover {
+        transform: translateY(-2px);
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+    input, select {
+        padding: 8px 12px;
+        margin: 5px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: var(--container-bg);
+        color: var(--text-color);
+        transition: all 0.3s;
+    }
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--button-bg);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    button {
+        background-color: var(--button-bg);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    button:hover {
+        background-color: var(--button-hover);
+        transform: translateY(-1px);
+    }
+    .results {
+        margin-top: 30px;
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: var(--container-bg);
+    }
+    table th, table td {
+        min-width: 120px; 
+        white-space: nowrap; 
+    }
+    th {
+        cursor: pointer;
+        background-color: var(--table-header);
+        color: white;
+        transition: background-color 0.3s;
+    }
+    th:hover {
+        background-color: var(--button-hover);
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid var(--border-color);
+    }
+    tr:nth-child(even) {
+        background-color: var(--table-stripe);
+    }
+    .sort-arrow {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        margin-left: 5px;
+        vertical-align: middle;
+        border-right: 4px solid transparent;
+        border-left: 4px solid transparent;
+    }
+    .sort-arrow.asc {
+        border-bottom: 4px solid white;
+    }
+    .sort-arrow.desc {
+        border-top: 4px solid white;
+    }
+    .disabled {
+        background-color: var(--input-bg);
+        cursor: not-allowed;
+    }
+    .dimensions-label {
+        font-size: 0.9em;
+        color: var(--subtitle-color);
+        margin-left: 8px;
+    }
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+        
+        .container {
+            padding: 15px;
+        }
+        
+        .input-group {
+            padding: 10px;
+        }
+    }
+</style>
+</head>
+<body data-theme="dark">
+<div class="theme-switch">
+    <button class="theme-btn" onclick="toggleTheme()">Modo claro</button>
+</div>
+<div class="container">
+    <h1>Calculadora de Presi&#xf3;n Lateral de los Encofrados</h1>
+    <p class="subtitle">Desarrollado por Luis V&#xe1;zquez - desarrolladormadrid</p>
+    
+    <div class="input-group">
+        <label>Material:</label>
+        <select id="material" onchange="actualizarDensidad()">
+            <option value="2400">Hormig&#xf3;n (2400 kg/m&#xb3;)</option>
+            <option value="1000">Agua (1000 kg/m&#xb3;)</option>
+        </select>
+    </div>
+    
+    <div class="input-group">
+        <label>Densidad personalizada (kg/m&#xb3;):</label>
+        <input type="number" id="densidad" value="2400">
+    </div>
+    
+    <div class="input-group">
+        <label>Dimensiones del encofrado:</label>
+        <input type="number" id="altura" value="50" placeholder="Altura (cm)">
+        <input type="number" id="ancho" value="80" placeholder="Ancho (cm)">
+        <input type="number" id="largo" value="40" placeholder="Largo (cm)">
+    </div>
+    
+    <div class="input-group">
+        <label>Dimensiones del tabl&#xf3;n:</label>
+        <input type="number" id="tablonAlto" value="0.80" step="0.01" placeholder="Alto (m)" onchange="calcularAreaTablon()">
+        <span class="dimensions-label">(altura en metros: <span id="tablonAltoMetros">0.80</span>m)</span>
+        <br>
+        <input type="number" id="tablonAncho" value="0.40" step="0.01" placeholder="Ancho (m)" onchange="calcularAreaTablon()">
+        <span class="dimensions-label">(longitud en metros: <span id="tablonAnchoMetros">0.40</span>m)</span>
+        <br>
+        <label>&#xc1;rea del tabl&#xf3;n (m&#xb2;):</label>
+        <input type="number" id="areaTablon" value="0.32" step="0.01" class="disabled" readonly>
+    </div>
+    
+    <button onclick="calcular()">Calcular</button>
+    
+    <div class="results">
+        <h2>Resultados:</h2>
+        <div id="resultados"></div>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="presionChart"></canvas>
+    </div>
+</div>
+
+<script>let myChart = null;
+let sortDirection = 'desc';
+let currentData = [];
+function toggleTheme() {
+  const body = document.body;
+  const themeBtn = document.querySelector('.theme-btn');
+  const currentTheme = body.getAttribute('data-theme');
+  if (currentTheme === 'dark') {
+    body.removeAttribute('data-theme');
+    themeBtn.textContent = 'Modo oscuro';
+  } else {
+    body.setAttribute('data-theme', 'dark');
+    themeBtn.textContent = 'Modo claro';
+  }
+  if (myChart) {
+    calcular();
+  }
+}
+function actualizarMedidasMetros() {
+  const alto = parseFloat(document.getElementById('tablonAlto').value) || 0;
+  const ancho = parseFloat(document.getElementById('tablonAncho').value) || 0;
+  document.getElementById('tablonAltoMetros').textContent = alto.toFixed(2);
+  document.getElementById('tablonAnchoMetros').textContent = ancho.toFixed(2);
+}
+function calcularAreaTablon() {
+  const alto = parseFloat(document.getElementById('tablonAlto').value);
+  const ancho = parseFloat(document.getElementById('tablonAncho').value);
+  const area = alto * ancho;
+  document.getElementById('areaTablon').value = area.toFixed(2);
+  actualizarMedidasMetros();
+  calcular();
+}
+function actualizarDensidad() {
+  const materialSelect = document.getElementById('material');
+  const densidadInput = document.getElementById('densidad');
+  densidadInput.value = materialSelect.value;
+  calcular();
+}
+function calcularVolumen(altura, ancho, largo) {
+  return altura * ancho * largo / 1000000;
+}
+function sortTable(order = 'desc') {
+  sortDirection = order;
+  currentData.sort((a, b) => {
+    return order === 'asc' ? a.altura - b.altura : b.altura - a.altura;
+  });
+  actualizarTabla();
+}
+function toggleSort() {
+  sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+  sortTable(sortDirection);
+}
+function actualizarTabla() {
+  let resultadosHTML = '<table>';
+  resultadosHTML += `<tr>
+        <th onclick="toggleSort()">
+            Altura desde la superficie (cm)
+            <span class="sort-arrow ${sortDirection === 'asc' ? 'asc' : 'desc'}"></span>
+        </th>
+        <th>Presión Lateral (kg/m²)</th>
+        <th>Presión (N/m²)</th>
+        <th>Presión (Pascal)</th>
+        <th>Fuerza en el tablón (kg)</th>
+        <th>Volumen (m³)</th>
+    </tr>`;
+  currentData.forEach(row => {
+    resultadosHTML += `<tr>
+            <td>${row.altura}</td>
+            <td>${row.presionLateral.toFixed(2)}</td>
+            <td>${row.presionNewton.toFixed(2)}</td>
+            <td>${row.presionPascal.toFixed(2)}</td>
+            <td>${row.fuerzaTablon.toFixed(2)}</td>
+            <td>${row.volumen.toFixed(3)}</td>
+        </tr>`;
+  });
+  resultadosHTML += '</table>';
+  document.getElementById('resultados').innerHTML = resultadosHTML;
+}
+function calcular() {
+  const altura = parseFloat(document.getElementById('altura').value);
+  const ancho = parseFloat(document.getElementById('ancho').value);
+  const largo = parseFloat(document.getElementById('largo').value);
+  const densidadHormigon = parseFloat(document.getElementById('densidad').value);
+  const areaTablon = parseFloat(document.getElementById('areaTablon').value);
+  const g = 9.81;
+  const intervalos = Math.ceil(altura / 10);
+  const presiones = [];
+  const alturas = [];
+  currentData = [];
+  for (let i = 0; i <= intervalos; i++) {
+    const alturaActual = i * 10;
+    if (alturaActual > altura) break;
+    const profundidad = altura - alturaActual;
+    const presionLateral = densidadHormigon * (profundidad / 100);
+    const presionNewton = presionLateral * g;
+    const presionPascal = presionNewton;
+    const fuerzaTablon = presionLateral * areaTablon;
+    const volumen = calcularVolumen(profundidad, ancho, largo);
+    presiones.push(presionLateral);
+    alturas.push(alturaActual);
+    currentData.push({
+      altura: alturaActual,
+      presionLateral: presionLateral,
+      presionNewton: presionNewton,
+      presionPascal: presionPascal,
+      fuerzaTablon: fuerzaTablon,
+      volumen: volumen
+    });
+  }
+  sortTable(sortDirection);
+  if (myChart) {
+    myChart.destroy();
+  }
+  const isDarkTheme = document.body.getAttribute('data-theme') === 'dark';
+  const gridColor = isDarkTheme ? '#666' : '#ddd';
+  const textColor = isDarkTheme ? '#ecf0f1' : '#2c3e50';
+  const ctx = document.getElementById('presionChart').getContext('2d');
+  myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: alturas,
+      datasets: [{
+        label: 'Presión Lateral (kg/m²)',
+        data: presiones,
+        borderColor: '#3498db',
+        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+        tension: 0.1,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Altura desde la superficie (cm)',
+            color: textColor
+          },
+          grid: {
+            color: gridColor
+          },
+          ticks: {
+            color: textColor
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Presión (kg/m²)',
+            color: textColor
+          },
+          beginAtZero: true,
+          grid: {
+            color: gridColor
+          },
+          ticks: {
+            color: textColor
+          }
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'Distribución de Presión Lateral del Hormigón',
+          color: textColor
+        },
+        legend: {
+          labels: {
+            color: textColor
+          }
+        }
+      }
+    }
+  });
+}
+document.body.setAttribute('data-theme', 'dark');
+document.querySelector('.theme-btn').textContent = 'Modo claro';
+calcularAreaTablon();
+calcular();
+document.getElementById('tablonAlto').addEventListener('input', calcularAreaTablon);
+document.getElementById('tablonAncho').addEventListener('input', calcularAreaTablon);
+</script>
+</body>
+</html>
